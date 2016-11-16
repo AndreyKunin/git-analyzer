@@ -1,0 +1,33 @@
+<div id="sidebar-collapse" class="col-sm-3 col-lg-2 sidebar">
+    <ul class="nav menu">
+        <li {highlight_menu_for(cost_analysis.html)}><a href="cost_analysis.html"><svg class="glyph stroked line-graph"><use xlink:href="#stroked-line-graph"></use></svg> Cost analysis</a></li>
+        <li {highlight_menu_for(merge_bottlenecks.html)}><a href="merge_bottlenecks.html"><svg class="glyph stroked chain"><use xlink:href="#stroked-chain"/></svg> Merge bottlenecks</a></li>
+        <li {highlight_menu_for(contributors.html)}><a href="contributors.html"><svg class="glyph stroked male user "><use xlink:href="#stroked-male-user"/></svg> Contributors</a></li>
+        <li {highlight_menu_for(stability_analysis.html)}><a href="stability_analysis.html"><svg class="glyph stroked clock"><use xlink:href="#stroked-clock"/></svg> Stability analysis</a></li>
+        <li {highlight_menu_for(activity_analysis.html)}><a href="activity_analysis.html"><svg class="glyph stroked clock"><use xlink:href="#stroked-clock"/></svg> Activity analysis</a></li>
+        <li {highlight_menu_for(implicit_dependencies.html)}><a href="implicit_dependencies.html"><svg class="glyph stroked table"><use xlink:href="#stroked-table"/></svg> Implicit dependencies</a></li>
+        <li role="presentation" class="divider"></li>
+    </ul>
+    <form role="form" action="actions/filter" method="post">
+        <input type="hidden" name="return_page" value="{return_page()}">
+        <div class="form-group" id="select_period">
+            <label>Display Period</label>
+            <select class="form-control" name="period" onchange="javascript:document.forms[0].submit()">
+                <option value="ALL" {select_period_for(ALL)}>All time</option>
+                <option value="LAST_12" {select_period_for(LAST_12)}>Last year</option>
+                <option value="LAST_6" {select_period_for(LAST_6)}>Last 6 months</option>
+                <option value="LAST_3" {select_period_for(LAST_3)}>Last 3 months</option>
+                <option value="LAST_1" {select_period_for(LAST_1)}>Last month</option>
+            </select>
+        </div>
+        <div class="form-group" id="filename_filter">
+            <label>Filter by filename</label>
+            <input type="hidden" name="set_filemask" value="{set_filemask_for(contributors.html)}">
+            <div>
+                <input class="form-control" name="filemask" value="{filemask_value()}" style="width:80%;display:inline">
+                <a class="btn btn-primary" href="javascript:document.forms[0].submit()"><svg class="glyph stroked chevron right"><use xlink:href="#stroked-chevron-right"/></svg></a>
+            </div>
+        </div>
+    </form>
+
+</div>

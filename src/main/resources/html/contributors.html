@@ -1,0 +1,225 @@
+{header.html}
+
+<!-- JQVMap -->
+<link href="css/jqvmap.min.css" rel="stylesheet"/>
+
+{menu.html -r}
+
+<div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Most active contributors</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Contribution by location</div>
+                <div class="panel-body">
+                    <div id="world-map-abs" style="height:400px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Efficiency by location</div>
+                <div class="panel-body">
+                    <div id="world-map-eff" style="height:400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Detailed contribution by team</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/teams.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="teams-table" data-toggle="table" data-url="tables/teams.json" data-pagination="true" data-page-size="25" data-sort-name="weight" data-sort-order="desc" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="name" data-sortable="true">Name</th>
+                                <th data-field="weight" data-sortable="true">Count of changes</th>
+                                <th data-field="weight_p" data-sortable="true">Summary contribution, %</th>
+                                <th data-field="weight_eff" data-sortable="true">Changes per member</th>
+                                <th data-field="files" data-sortable="false">Files</th>
+                                <th data-field="modules" data-sortable="false">Modules</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Contribution by team</div>
+                <div class="panel-body">
+                    <div class="canvas-wrapper">
+                        <canvas class="main-chart" id="team-contrib-chart" height="200" width="600"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Efficiency by team</div>
+                <div class="panel-body">
+                    <div class="canvas-wrapper">
+                        <canvas class="main-chart" id="team-eff-chart" height="200" width="600"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Personal contribution</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/contributors.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="personal-table" data-toggle="table" data-url="tables/contributors.json" data-pagination="true" data-page-size="25" data-sort-name="weight" data-sort-order="desc" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="name" data-sortable="true">Name</th>
+                                <th data-field="email" data-sortable="true" >E-mail</th>
+                                <th data-field="team" data-sortable="true" >Team</th>
+                                <th data-field="weight" data-sortable="true">Count of changes</th>
+                                <th data-field="weight_p" data-sortable="true">Summary contribution, %</th>
+                                <th data-field="files" data-sortable="false">Files</th>
+                                <th data-field="modules" data-sortable="false">Modules</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{modal_window_files.html}
+
+<script type="text/javascript">
+
+    function getAuthor(anchorId) {
+        var tdList = $("#"+anchorId).parent().parent().children("td");
+        return tdList.eq(0).text() + " (" + tdList.eq(1).text() + ")";
+    }
+
+    function getTeam(anchorId) {
+        var tdList = $("#"+anchorId).parent().parent().children("td");
+        return tdList.eq(0).text();
+    }
+
+	var teamChartData = {
+		labels : [{chart_team_data(label)}],
+		datasets : [
+			{
+				fillColor : "rgba(48, 164, 255, 0.2)",
+				strokeColor : "rgba(48, 164, 255, 0.8)",
+				highlightFill : "rgba(48, 164, 255, 0.75)",
+				highlightStroke : "rgba(48, 164, 255, 1)",
+				data : [{chart_team_data(abs)}]
+			}
+		]
+	};
+
+	var teamEffChartData = {
+		labels : [{chart_team_data(label)}],
+		datasets : [
+			{
+				fillColor : "rgba(48, 164, 255, 0.2)",
+				strokeColor : "rgba(48, 164, 255, 0.8)",
+				highlightFill : "rgba(48, 164, 255, 0.75)",
+				highlightStroke : "rgba(48, 164, 255, 1)",
+				data : [{chart_team_data(eff)}]
+			}
+		]
+	};
+
+    window.onload = function() {
+        var chartObject = document.getElementById("team-contrib-chart");
+        if (chartObject) {
+            var chart1 = chartObject.getContext("2d");
+            window.myBar1 = new Chart(chart1).Bar(teamChartData, {
+                responsive : true
+            });
+        }
+        chartObject = document.getElementById("team-eff-chart");
+        if (chartObject) {
+            var chart2 = chartObject.getContext("2d");
+            window.myBar2 = new Chart(chart2).Bar(teamEffChartData, {
+                responsive : true
+            });
+        }
+    }
+
+</script>
+
+<!-- JQVMap -->
+
+<script src="js/jquery-2.2.4.min.js"></script>
+<script src="js/jquery.vmap.min.js"></script>
+<script src="js/jquery.vmap.world.js"></script>
+<script>
+var abs_data = {{map_location_data(abs)}};
+var norm_data = {{map_location_data(norm)}};
+var eff_data = {{map_location_data(eff)}};
+
+      $(document).ready(function(){
+        $('#world-map-abs').vectorMap({
+            map: 'world_en',
+            backgroundColor: null,
+            color: '#ffffff',
+            hoverOpacity: 0.7,
+            selectedColor: '#666666',
+            enableZoom: true,
+            showTooltip: true,
+            values: abs_data,
+            scaleColors: ['#E6F2F0', '#149B7E'],
+            normalizeFunction: 'polynomial',
+            onLabelShow: function(event, label, code) {
+                if (abs_data[code]) {
+                    label[0].innerHTML += ": " + abs_data[code] + " changes (" + norm_data[code] + "%)";
+                }
+            }
+        });
+        $('#world-map-eff').vectorMap({
+            map: 'world_en',
+            backgroundColor: null,
+            color: '#ffffff',
+            hoverOpacity: 0.7,
+            selectedColor: '#666666',
+            enableZoom: true,
+            showTooltip: true,
+            values: eff_data,
+            scaleColors: ['#E6F2F0', '#149B7E'],
+            normalizeFunction: 'polynomial',
+            onLabelShow: function(event, label, code) {
+                if (eff_data[code]) {
+                    label[0].innerHTML += ": " + eff_data[code] + " changes per author";
+                }
+            }
+        });
+      });
+</script>
+<script src="js/chart.min-1.0.1.js"></script>
+
+{footer.html}

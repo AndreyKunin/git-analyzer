@@ -1,0 +1,48 @@
+<div class="modal fade" id="filesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="filesModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <table id="top-files-table" data-toggle="table" data-url="" data-pagination="true" data-sort-name="weight" data-sort-order="desc">
+                    <thead>
+                    <tr>
+                        <th data-field="path" data-sortable="false">Path</th>
+                        <th data-field="weight" data-sortable="false" >Count of changes</th>
+                        <th data-field="weight_p" data-sortable="false" >Proportion, %</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function showTeamFilesModal(anchorId, paramName, word) {
+        var team = getTeam(anchorId);
+        $('#filesModal').modal();
+        $("#filesModalLabel").text(team + " mostly contributes to " + word + ":");
+        $("#top-files-table").bootstrapTable("refresh", {
+            url: "tables/top_" + paramName + ".json?team=" + encodeURIComponent(team)
+        });
+    }
+
+    function showFilesModal(anchorId, paramName) {
+        var author = getAuthor(anchorId);
+        $('#filesModal').modal();
+        $("#filesModalLabel").text(author + " mostly contributes to " + paramName + ":");
+        $("#top-files-table").bootstrapTable("refresh", {
+            url: "tables/top_" + paramName + ".json?author=" + encodeURIComponent(author)
+        });
+    }
+
+</script>

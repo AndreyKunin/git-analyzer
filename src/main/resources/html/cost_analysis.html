@@ -1,0 +1,208 @@
+{header.html}
+
+{menu.html -r}
+
+<div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Lifecycle costs</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Distribution of changes across source files</div>
+                <div class="panel-body">
+                    <div class="canvas-wrapper">
+                        <canvas class="main-chart" id="file-changes-chart" height="200" width="600"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Hot files</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/hot_files.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="hot-files-table" data-row-style="rowStyleFiles" data-toggle="table" data-url="tables/hot_files.json" data-pagination="true" data-sort-name="weight" data-sort-order="desc" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="weight" data-sortable="true" >Count of changes</th>
+                                <th data-field="weight_p" data-sortable="true" >Proportion of changes, %</th>
+                                <th data-field="path" data-sortable="true">File path</th>
+                                <th data-field="authors" data-sortable="false">Authors</th>
+                                <th data-field="teams" data-sortable="false">Teams</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Distribution of changes across modules</div>
+                <div class="panel-body">
+                    <div class="canvas-wrapper">
+                        <canvas class="main-chart" id="module-changes-chart" height="200" width="600"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Hot modules</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/hot_modules.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="hot-modules-table" data-row-style="rowStyleModules" data-toggle="table" data-url="tables/hot_modules.json" data-pagination="true" data-sort-name="weight" data-sort-order="desc" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="weight" data-sortable="true" >Count of changes</th>
+                                <th data-field="weight_p" data-sortable="true" >Proportion of changes, %</th>
+                                <th data-field="path" data-sortable="true">Module path</th>
+                                <th data-field="authors" data-sortable="false">Authors</th>
+                                <th data-field="teams" data-sortable="false">Teams</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{modal_window_authors.html}
+
+{modal_window_teams.html}
+
+<script type="text/javascript">
+
+    function getPath(anchorId) {
+        var tdList = $("#"+anchorId).parent().parent().children("td");
+        return tdList.eq(2).text();
+    }
+
+	function rowStyleFiles(row, index) {
+	    var average = fileChartData.datasets[1].data[0];
+	    return rowStyle(row, index, average);
+	}
+
+	function rowStyleModules(row, index) {
+	    var average = moduleChartData.datasets[1].data[0];
+	    return rowStyle(row, index, average);
+	}
+
+	function rowStyle(row, index, average) {
+	    if (row.weight >= 10 * average) {
+	        return {
+	            classes: 'danger'
+	        };
+	    }
+	    if (row.weight >= average) {
+	        return {
+	            classes: 'warning'
+	        };
+	    }
+	    if (row.weight == 1) {
+	        return {};
+	    }
+	    return {
+	        classes: 'success'
+	    };
+	}
+
+	var fileChartData = {
+		labels : [{cost_analysis_files(x)}],
+		datasets : [
+			{
+				label: "Real distribution",
+				fillColor : "rgba(48, 164, 255, 0.5)",
+				strokeColor : "rgba(48, 164, 255, 1)",
+				pointColor : "rgba(48, 164, 255, 1)",
+				pointStrokeColor : "#fff",
+				pointHighlightFill : "#fff",
+				pointHighlightStroke : "rgba(48, 164, 255, 1)",
+				data : [{cost_analysis_files(y)}]
+			},{
+				label: "Ideal distribution",
+				fillColor : "rgba(46, 158, 11, 0.0)",
+				strokeColor : "rgba(46, 158, 11, 1)",
+				pointColor : "rgba(46, 158, 11, 1)",
+				pointStrokeColor : "#fff",
+				pointHighlightFill : "#fff",
+				pointHighlightStroke : "rgba(46, 158, 11, 1)",
+				data : [{cost_analysis_files(y_ideal)}]
+			}
+		]
+
+	};
+
+	var moduleChartData = {
+		labels : [{cost_analysis_modules(x)}],
+		datasets : [
+			{
+				label: "My Second dataset",
+				fillColor : "rgba(48, 164, 255, 0.5)",
+				strokeColor : "rgba(48, 164, 255, 1)",
+				pointColor : "rgba(48, 164, 255, 1)",
+				pointStrokeColor : "#fff",
+				pointHighlightFill : "#fff",
+				pointHighlightStroke : "rgba(48, 164, 255, 1)",
+				data : [{cost_analysis_modules(y)}]
+			},{
+				label: "Ideal distribution",
+				fillColor : "rgba(46, 158, 11, 0.0)",
+				strokeColor : "rgba(46, 158, 11, 1)",
+				pointColor : "rgba(46, 158, 11, 1)",
+				pointStrokeColor : "#fff",
+				pointHighlightFill : "#fff",
+				pointHighlightStroke : "rgba(46, 158, 11, 1)",
+				data : [{cost_analysis_modules(y_ideal)}]
+			}
+		]
+
+	};
+
+
+    window.onload = function() {
+        var chartObject = document.getElementById("file-changes-chart");
+        if (chartObject) {
+            var chart1 = chartObject.getContext("2d");
+            window.myLine1 = new Chart(chart1).Line(fileChartData, {
+                responsive: true
+            });
+        }
+        chartObject = document.getElementById("module-changes-chart");
+        if (chartObject) {
+            var chart2 = chartObject.getContext("2d");
+            window.myLine2 = new Chart(chart2).Line(moduleChartData, {
+                responsive: true
+            });
+        }
+        $('#filename_filter').hide();
+    };
+</script>
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/chart.min-1.0.1.js"></script>
+
+{footer.html}

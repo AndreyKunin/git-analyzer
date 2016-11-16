@@ -1,0 +1,229 @@
+{header.html}
+
+{menu.html -r}
+
+<div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Temporal activity analysis</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Whole project team activity</div>
+                <div class="panel-body">
+                    <div class="canvas-wrapper">
+                        <canvas class="main-chart" id="project-activity-chart" height="200" width="600"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">Teams activity</div>
+                <div class="panel-body">
+                    <table id="teams-table" data-toggle="table" data-pagination="true" data-url="tables/teamlist.json" data-page-size="5" data-sort-name="name" data-sort-order="asc" data-click-to-select="true" data-single-select="true" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="sel" data-checkbox="true"></th>
+                                <th data-field="name" data-sortable="true">Name</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel panel-default">
+                    <div class="panel-heading" id="team-activity-chart-header"></div>
+                    <div class="panel-body">
+                        <div class="canvas-wrapper" id="team-activity-chart-container">
+                            <canvas class="main-chart" id="team-activity-chart" height="200" width="600"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">Individual activity</div>
+                <div class="panel-body">
+                    <table id="authors-table" data-toggle="table" data-pagination="true" data-url="tables/authorlist.json" data-page-size="5" data-sort-name="name" data-sort-order="asc" data-click-to-select="true" data-single-select="true" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="sel" data-checkbox="true"></th>
+                                <th data-field="name" data-sortable="true">Name</th>
+                                <th data-field="email" data-sortable="true" data-visible="false">E-mail</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="panel panel-default">
+                <div class="panel panel-default">
+                    <div class="panel-heading" id="author-activity-chart-header"></div>
+                    <div class="panel-body">
+                        <div class="canvas-wrapper" id="author-activity-chart-container">
+                            <canvas class="main-chart" id="author-activity-chart" height="200" width="600"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+
+	var projectChartData = {
+		labels : [{project_activity(x)}],
+		datasets : [
+			{
+                backgroundColor: "rgba(48, 164, 255, 0.2)",
+                pointBackgroundColor: "rgba(48, 164, 255, 1)",
+                pointRadius: 3,
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: "rgba(255, 99, 132, 1)",
+				pointBorderWidth : 1,
+				pointBorderColor: "#fff",
+                borderColor: "rgba(48, 164, 255, 1)",
+                showLine: true,
+				data : [{project_activity(y)}]
+			}
+		]
+
+	};
+
+	var chartDataTeams = {
+		labels : [],
+		datasets : [
+			{
+                backgroundColor: "rgba(48, 164, 255, 0.2)",
+                pointBackgroundColor: "rgba(48, 164, 255, 1)",
+                pointRadius: 3,
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: "rgba(255, 99, 132, 1)",
+				pointBorderWidth : 1,
+				pointBorderColor: "#fff",
+                borderColor: "rgba(48, 164, 255, 1)",
+                showLine: true,
+				data : []
+			}
+		]
+
+	};
+
+	var chartDataAuthors = {
+		labels : [],
+		datasets : [
+			{
+                backgroundColor: "rgba(48, 164, 255, 0.2)",
+                pointBackgroundColor: "rgba(48, 164, 255, 1)",
+                pointRadius: 3,
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: "rgba(255, 99, 132, 1)",
+				pointBorderWidth : 1,
+				pointBorderColor: "#fff",
+                borderColor: "rgba(48, 164, 255, 1)",
+                showLine: true,
+				data : []
+			}
+		]
+
+	};
+
+	function loadActivityChart(chartObject, chartData) {
+        if (chartObject) {
+            var chart1 = chartObject.getContext("2d");
+            window.myLine1 = Chart.Line(chart1, {
+                data: chartData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Average amount of changes'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+	}
+
+	function updateChartData(chartData, canvasId, headerId, selectionId, name) {
+        $.getJSON("charts/activity_chart.json?type=" + name + "&name=" + encodeURIComponent(selectionId), function(responseAsJSON, status) {
+            if (status == "success") {
+                reloadChart(canvasId);
+                chartData.labels = responseAsJSON[0];
+                chartData.datasets[0].data = responseAsJSON[1];
+                initChart(chartData, canvasId, headerId, selectionId, name);
+            } else {
+                alert("Call to server is failed.");
+            }
+        });
+	}
+
+	function reloadChart(canvasId) {
+        var chartObject = $("#" + canvasId);
+        if (chartObject) {
+            chartObject.remove();
+            var container = $("#" + canvasId + "-container");
+            if (container) {
+                container.append("<canvas class=\"main-chart\" id=\"" + canvasId + "\" height=\"200\" width=\"600\"></canvas>");
+            }
+        }
+	}
+
+	function initChart(chartData, canvasId, headerId, selectionId, name) {
+        var chartObject = document.getElementById(canvasId);
+        loadActivityChart(chartObject, chartData);
+        var chartHeaderObject = document.getElementById(headerId);
+        if (selectionId) {
+            chartHeaderObject.innerHTML = "Activity of " + selectionId + ".";
+        } else {
+            chartHeaderObject.innerHTML = "Select " + name + " from table on the left.";
+        }
+	}
+
+    window.onload = function() {
+        var chartObject1 = document.getElementById("project-activity-chart");
+        loadActivityChart(chartObject1, projectChartData);
+
+        initChart(chartDataTeams, "team-activity-chart", "team-activity-chart-header", null, "team");
+        initChart(chartDataAuthors, "author-activity-chart", "author-activity-chart-header", null, "author");
+
+        $('#teams-table').on('check.bs.table', function (e, row) {
+            updateChartData(chartDataTeams, "team-activity-chart", "team-activity-chart-header", row.name, "team");
+        });
+
+        $('#authors-table').on('check.bs.table', function (e, row) {
+            updateChartData(chartDataTeams, "author-activity-chart", "author-activity-chart-header", row.name + " (" + row.email + ")", "author");
+        });
+        $('#select_period').hide();
+        $('#filename_filter').hide();
+    }
+</script>
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/chart.min-2.3.0.js"></script>
+
+{footer.html}

@@ -1,0 +1,137 @@
+{header.html}
+
+{menu.html -r}
+
+<div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">The most shared areas</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Count of authors per module (Top 30)</div>
+                <div class="panel-body">
+                    <div class="canvas-wrapper">
+                        <canvas class="main-chart" id="shared-modules-chart" height="200" width="600"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Shared modules (5 and more contributors)</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/shared_modules.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="shared-modules-table" data-row-style="rowStyle" data-toggle="table" data-url="tables/shared_modules.json" data-pagination="true" data-sort-name="c_count" data-sort-order="desc" data-search="true">
+                        <thead>
+                        <tr>
+                            <th data-field="path" data-sortable="true">File path</th>
+                            <th data-field="c_count" data-sortable="true" >Count of authors</th>
+                            <th data-field="authors" data-sortable="false">Authors</th>
+                            <th data-field="teams" data-sortable="false">Teams</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Shared files (5 and more contributors)</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/shared_files.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="shared-files-table" data-row-style="rowStyle" data-toggle="table" data-url="tables/shared_files.json" data-pagination="true" data-sort-name="c_count" data-sort-order="desc" data-search="true">
+                        <thead>
+                        <tr>
+                            <th data-field="path" data-sortable="true">Module path</th>
+                            <th data-field="c_count" data-sortable="true" >Count of authors</th>
+                            <th data-field="authors" data-sortable="false">Authors</th>
+                            <th data-field="teams" data-sortable="false">Teams</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{modal_window_authors.html}
+
+{modal_window_teams.html}
+
+<script type="text/javascript">
+
+    function getPath(anchorId) {
+        var tdList = $("#"+anchorId).parent().parent().children("td");
+        return tdList.eq(0).text();
+    }
+
+	function rowStyle(row, index) {
+	    if (row.c_count >= 100) {
+	        return {
+	            classes: 'danger'
+	        };
+	    }
+	    if (row.c_count >= 20) {
+	        return {
+	            classes: 'warning'
+	        };
+	    }
+	    if (row.c_count < 10) {
+	        return {
+	            classes: 'success'
+	        };
+	    }
+	    return {};
+	}
+
+	var moduleChartData = {
+		labels : [{merge_analysis_modules(x)}],
+		datasets : [
+			{
+				fillColor : "rgba(48, 164, 255, 0.2)",
+				strokeColor : "rgba(48, 164, 255, 0.8)",
+				highlightFill : "rgba(48, 164, 255, 0.75)",
+				highlightStroke : "rgba(48, 164, 255, 1)",
+				data : [{merge_analysis_modules(y)}]
+			}
+		]
+	};
+
+    window.onload = function() {
+        var chartObject = document.getElementById("shared-modules-chart");
+        if (chartObject) {
+            var chart1 = chartObject.getContext("2d");
+            window.myBar = new Chart(chart1).Bar(moduleChartData, {
+                responsive : true
+            });
+        }
+        $('#filename_filter').hide();
+    }
+
+</script>
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/chart.min-1.0.1.js"></script>
+
+{footer.html}

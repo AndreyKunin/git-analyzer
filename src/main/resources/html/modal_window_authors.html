@@ -1,0 +1,41 @@
+<div class="modal fade" id="authorsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="authorsModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <table id="top-authors-table" data-toggle="table" data-url="" data-pagination="true" data-sort-name="weight" data-sort-order="desc">
+                    <thead>
+                    <tr>
+                        <th data-field="name" data-sortable="false">Name</th>
+                        <th data-field="email" data-sortable="false">E-mail</th>
+                        <th data-field="team" data-sortable="false">Team</th>
+                        <th data-field="weight" data-sortable="false" >Amount of changes</th>
+                        <th data-field="weight_p" data-sortable="false" >Proportion of changes, %</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function showAuthorsModal(anchorId, paramName) {
+        var path = getPath(anchorId);
+        $('#authorsModal').modal();
+        $("#authorsModalLabel").text("Top authors of " + path);
+        $("#top-authors-table").bootstrapTable("refresh", {
+            url: "tables/top_authors.json?" + paramName + "=" + encodeURIComponent(path)
+        });
+    }
+
+</script>

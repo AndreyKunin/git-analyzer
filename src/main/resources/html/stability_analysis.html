@@ -1,0 +1,164 @@
+{header.html}
+
+{menu.html -r}
+
+<div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Temporal stability analysis</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Stability of architecture, on module basis</div>
+                <div class="panel-body">
+                    <div class="canvas-wrapper">
+                        <canvas class="main-chart" id="module-ages-chart" height="200" width="600"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Detailed module statistics</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/modules_age.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="modules-age-table" data-row-style="rowStyle" data-toggle="table" data-url="tables/modules_age.json" data-pagination="true" data-sort-name="stability" data-sort-order="asc" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="path" data-sortable="true">Module path</th>
+                                <th data-field="age" data-sortable="false">Age</th>
+                                <th data-field="interval" data-sortable="false">Time from last change</th>
+                                <th data-field="stability" data-sortable="true">Stability, %</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-left">Detailed file statistics</div>
+                    <a class="btn btn-primary pull-right" href="javascript:fileDownload('reports/files_age.csv')" style="padding:3px 12px; margin-left:5px">
+                        <span class="tooltiptext">Export</span>
+                        <svg class="glyph stroked blank document" style="margin:0"><use xlink:href="#stroked-blank-document"/></svg>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <table id="files-age-table" data-row-style="rowStyle" data-toggle="table" data-url="tables/files_age.json" data-pagination="true" data-sort-name="stability" data-sort-order="asc" data-search="true">
+                        <thead>
+                            <tr>
+                                <th data-field="path" data-sortable="true">File path</th>
+                                <th data-field="age" data-sortable="false">Age</th>
+                                <th data-field="interval" data-sortable="false">Time from last change</th>
+                                <th data-field="stability" data-sortable="true">Stability, %</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+	function rowStyle(row, index) {
+	    if (row.stability < 20) {
+	        return {
+	            classes: 'danger'
+	        };
+	    }
+	    if (row.stability >= 20 && row.stability <= 50) {
+	        return {
+	            classes: 'warning'
+	        };
+	    }
+	    if (row.stability > 50) {
+	        return {
+	            classes: 'success'
+	        };
+	    }
+	    return {};
+	}
+
+	var moduleChartData = {
+		datasets : [
+			{
+                backgroundColor: "rgba(255, 99, 132, 0.2)",
+                pointRadius: "0",
+                borderWidth: "0",
+                showLine: true,
+                lineTension: 0,
+				data : [{get_age_separator(modules)}]
+			},{
+				pointBorderColor: "rgba(48, 164, 255, 1)",
+                pointBackgroundColor: "rgba(48, 164, 255, 1)",
+                pointBorderWidth: "1",
+                showLine: false,
+				data : [{get_age_comparison(modules)}]
+			}
+		]
+
+	};
+
+
+    window.onload = function() {
+        var chartObject = document.getElementById("module-ages-chart");
+        if (chartObject) {
+            var chart1 = chartObject.getContext("2d");
+            window.myLine1 = Chart.Scatter(chart1, {
+                data: moduleChartData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        display: false
+                    },
+                    tooltips: {
+                        enabled: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            position: 'bottom',
+                            type: 'linear',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Time between first and last commit, days'
+                            }
+                        }],
+                        yAxes: [{
+                            position: 'left',
+                            type: 'linear',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Time from last commit, days'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+        $('#select_period').hide();
+        $('#filename_filter').hide();
+    }
+</script>
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/chart.min-2.3.0.js"></script>
+
+{footer.html}
