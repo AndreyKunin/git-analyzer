@@ -27,21 +27,21 @@
 
 <script type="text/javascript">
 
-    function showTeamFilesModal(anchorId, paramName, word) {
+    function showTeamFilesModal(anchorId, paramName, word, mask) {
         var team = getTeam(anchorId);
         $('#filesModal').modal();
         $("#filesModalLabel").text(team + " mostly contributes to " + word + ":");
         $("#top-files-table").bootstrapTable("refresh", {
-            url: "tables/top_" + paramName + ".json?team=" + encodeURIComponent(team)
+            url: "tables/top_" + paramName + ".json?team=" + encodeURIComponent(team) + "&mask=" + mask
         });
     }
 
-    function showFilesModal(anchorId, paramName) {
+    function showFilesModal(anchorId, paramName, mask) {
         var author = getAuthor(anchorId);
         $('#filesModal').modal();
         $("#filesModalLabel").text(author + " mostly contributes to " + paramName + ":");
         $("#top-files-table").bootstrapTable("refresh", {
-            url: "tables/top_" + paramName + ".json?author=" + encodeURIComponent(author)
+            url: "tables/top_" + paramName + ".json?author=" + encodeURIComponent(author) + "&mask=" + mask
         });
     }
 
