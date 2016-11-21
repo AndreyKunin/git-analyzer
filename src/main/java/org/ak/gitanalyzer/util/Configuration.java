@@ -115,6 +115,12 @@ public enum Configuration {
         commonProperties.put(propertyName, propertyValue);
     }
 
+    public void clean() {
+        commonProperties.clear();
+        configDirectory = null;
+        cacheDirectory = null;
+    }
+
     public int getInt(String propertyName, int defaultValue) {
         String s = getString(propertyName);
         return s == null ? defaultValue : Integer.parseInt(s);
