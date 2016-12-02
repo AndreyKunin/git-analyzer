@@ -6,12 +6,8 @@ import org.ak.gitanalyzer.step2.data.Link;
 import org.ak.gitanalyzer.step3.data.AuthorGroupStatistics;
 import org.ak.gitanalyzer.step3.data.AuthorStatistics;
 import org.ak.gitanalyzer.step3.data.AuthorSummary;
-import org.ak.gitanalyzer.util.Configuration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -61,7 +57,7 @@ public class AuthorsAnalyzer extends Analyzer {
         }
 
         authorSummaries.sort(AuthorSummary::compareTo);
-        double summaryContribution = authorSummaries.stream().map(AuthorSummary::getContributionWeight).reduce((a1, a2) -> a1 + a2).get();
+        double summaryContribution = authorSummaries.stream().map(AuthorSummary::getContributionWeight).reduce((a1, a2) -> a1 + a2).orElse(0.0);
         if (sampleSize > 0 && sampleSize < authorSummaries.size()) {
             authorSummaries = authorSummaries.subList(0, sampleSize);
         }
@@ -81,7 +77,7 @@ public class AuthorsAnalyzer extends Analyzer {
         return new AuthorSummary(author, summaryWeight);
     }
 
-    public List<String> getTeams(List<Author> authors) {
+    public List<String> getTeams(Collection<Author> authors) {
         List<String> result = new ArrayList<>();
         authors.stream().map(Author::getTeam).filter(x -> x != null).distinct().forEach(result::add);
         result.sort(String::compareTo);
@@ -91,8 +87,6 @@ public class AuthorsAnalyzer extends Analyzer {
     public List<Author> getAuthors(DataRepository dataRepository) {
         List<Author> result = new ArrayList<>(dataRepository.getAuthors().keySet());
         return result.stream()
-                .filter(author -> !(Configuration.INSTANCE.SERVICE_AUTHOR_MARKERS.stream()
-                        .filter(name -> author.getName() != null && author.getName().contains(name)).findFirst().isPresent()))
                 .sorted(new Author.NameEmailComparator())
                 .collect(Collectors.toList());
     }
@@ -101,9 +95,12 @@ public class AuthorsAnalyzer extends Analyzer {
         Map<String, Double> result = new HashMap<>();
         Map<String, Integer> counts = new HashMap<>();
         authorStatistics.getAuthorSummaries().stream().filter(as -> valueGetter.apply(as) != null).forEach(as -> {
-            String location = valueGetter.apply(as);
-            Double value = result.get(location);
-            Integer count = counts.get(location);
+            String groupName = valueGetter.apply(as);
+            if (groupName == null) {
+                return;
+            }
+            Double value = result.get(groupName);
+            Integer count = counts.get(groupName);
             if (value == null) {
                 value = 0.0;
             }
@@ -112,8 +109,8 @@ public class AuthorsAnalyzer extends Analyzer {
                 count = 0;
             }
             count++;
-            result.put(location, value);
-            counts.put(location, count);
+            result.put(groupName, value);
+            counts.put(groupName, count);
         });
         return new AuthorGroupStatistics(result, counts, result.values().stream().reduce((x1, x2) -> x1 + x2).orElse(0.0));
     }

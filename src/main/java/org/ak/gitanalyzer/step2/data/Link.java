@@ -9,7 +9,7 @@ public class Link {
     private File file;
 
     //calculated values
-    double weight = 1.0;  //If several commits were done for same JIRA by the same author this weight will be divided by the count of such commits.
+    private double weight = 1.0;  //If several commits were done for same JIRA by the same author this weight will be divided by the count of such commits.
 
     public Link(Author author, Commit commit, File file) {
         this.author = author;

@@ -20,7 +20,8 @@ public class TimelineAnalyzer extends Analyzer {
 
     public List<AgeStatistics> analyzeFilesAge(DataRepository dataRepository) {
         Map<File, List<Link>> files = dataRepository.getFiles();
-        return collectTimelineStatistics(files);
+        Long currentTime = new Date().getTime();
+        return collectTimelineStatistics(files, currentTime);
     }
 
     public List<AgeStatistics> analyzeModulesAge(DataRepository dataRepository) {
@@ -35,7 +36,8 @@ public class TimelineAnalyzer extends Analyzer {
             }
             moduleLinks.addAll(entry.getValue());
         });
-        return collectTimelineStatistics(linksByModules);
+        Long currentTime = new Date().getTime();
+        return collectTimelineStatistics(linksByModules, currentTime);
     }
 
     public List<ActivitySummary<Author>> analyzeAuthorsActivity(DataRepository dataRepository) {
@@ -51,8 +53,8 @@ public class TimelineAnalyzer extends Analyzer {
         return groupActivity(authorActivitySummary, author -> "").get(0);
     }
 
-    private List<AgeStatistics> collectTimelineStatistics(Map<File, List<Link>> files) {
-        return files.entrySet().stream().map(entry -> calculate(entry.getKey(), entry.getValue())).filter(ts -> ts != null).collect(Collectors.toList());
+    private List<AgeStatistics> collectTimelineStatistics(Map<File, List<Link>> files, long currentTime) {
+        return files.entrySet().stream().map(entry -> calculate(entry.getKey(), entry.getValue(), currentTime)).filter(ts -> ts != null).collect(Collectors.toList());
     }
 
     private <T> List<ActivitySummary<T>> analyzeActivity(Supplier<Map<T, List<Link>>> supplier) {
@@ -98,14 +100,13 @@ public class TimelineAnalyzer extends Analyzer {
         return new ArrayList<>(newEntityMap.values());
     }
 
-    private AgeStatistics calculate(File file, List<Link> _links) {
+    private AgeStatistics calculate(File file, List<Link> _links, long currentTime) {
         List<Link> links = _links.stream().filter(this::filter).collect(Collectors.toList());
         if (links.size() == 0) {
             return null;
         }
         links.sort(new AgeStatistics.DateComparator());
 
-        long currentTime = new Date().getTime();
         long firstCommitTime = links.get(0).getCommit().getDateTime().getTime();
         long lastCommitTime = links.get(links.size() - 1).getCommit().getDateTime().getTime();
         long nowMinusLast = currentTime - lastCommitTime;

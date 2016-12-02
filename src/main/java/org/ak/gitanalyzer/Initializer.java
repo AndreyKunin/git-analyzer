@@ -15,6 +15,7 @@ import org.ak.gitanalyzer.util.Configuration;
 import org.ak.gitanalyzer.util.FileException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,6 +24,16 @@ import java.util.TimerTask;
  * Created by Andrew on 14.11.2016.
  */
 class Initializer {
+
+    private Subprocess subprocess;
+
+    Initializer() {
+        subprocess = new Subprocess();
+    }
+
+    Initializer(Subprocess subprocess) {
+        this.subprocess = subprocess;
+    }
 
     boolean configure() throws IOException, SubprocessException, FileException {
         Configuration.StartMode mode = Configuration.INSTANCE.getStartMode();
@@ -52,6 +63,17 @@ class Initializer {
             startClient(server);
         }
         return true;
+    }
+
+    RawRepository loadRawRepository() throws IOException {
+        RawRepository rawRepository = RawRepository.restore();
+        if (rawRepository == null) {
+            rawRepository = buildRawRepository(null);
+            if (rawRepository != null) {
+                rawRepository.persist();
+            }
+        }
+        return rawRepository;
     }
 
     private GitAnalyzerServer startServer() throws IOException {
@@ -104,37 +126,14 @@ class Initializer {
                 .setPort(Configuration.INSTANCE.getInt("HTTP.server.port", 8000))
                 .buildCommand();
         System.out.println("Starting browser at " + IExploreBuilder.START_PAGE + ".");
-        Subprocess.start(new Initializer.ShutdownCallback(server)::exit, startBrowserCommand);
+        subprocess.start(new Initializer.ShutdownCallback(server)::exit, startBrowserCommand);
     }
 
     private void buildDataRepository(RawRepository rawRepository) {
         System.out.println("Building in-memory repository.");
         RepositoryBuilder repositoryBuilder = new RepositoryBuilder();
-        DataRepository dataRepository = repositoryBuilder.build(
-                rawRepository, Configuration.INSTANCE.getString("GIT.jira.prefix")
-        );
+        DataRepository dataRepository = repositoryBuilder.build(rawRepository);
         Application.INSTANCE.setDataRepository(dataRepository);
-    }
-
-    private RawRepository loadRawRepository() throws IOException {
-        RawRepository rawRepository = RawRepository.restore();
-        if (rawRepository == null) {
-            rawRepository = buildRawRepository(null);
-            if (rawRepository != null) {
-                rawRepository.persist();
-            }
-        }
-        return rawRepository;
-    }
-
-    private RawRepository updateRawRepository(Date dateFrom) throws IOException {
-        RawRepository originalRepository = RawRepository.restore();
-        RawRepository rawRepository = buildRawRepository(dateFrom);
-        if (rawRepository != null) {
-            originalRepository.merge(rawRepository);
-            originalRepository.persist();
-        }
-        return originalRepository;
     }
 
     private void scheduleUpdates() {
@@ -148,8 +147,9 @@ class Initializer {
         RawRepository rawRepository = null;
         System.out.println("Gathering GIT statistics.");
         try {
-            rawRepository = new StatisticsCollector().collect(dateFrom);
+            rawRepository = new StatisticsCollector(subprocess).collect(dateFrom);
         } catch (SubprocessException ex) {
+            System.out.println(ex.getMessage());
             ex.printStackTrace(System.out);
         }
         return rawRepository;
@@ -169,7 +169,7 @@ class Initializer {
         }
     }
 
-    private class RepositoryUpdateTask extends TimerTask {
+    class RepositoryUpdateTask extends TimerTask {
 
         @Override
         public void run() {
@@ -186,6 +186,21 @@ class Initializer {
             } catch (Throwable t) {
                 System.out.println("Error during incremental update: " + t.getMessage());
                 t.printStackTrace(System.out);
+            }
+        }
+
+        private RawRepository updateRawRepository(Date dateFrom) throws IOException {
+            RawRepository originalRepository = RawRepository.restore();
+            if (originalRepository == null) {
+                originalRepository = new RawRepository(new ArrayList<>(), new Date());
+            }
+            RawRepository rawRepository = buildRawRepository(dateFrom);
+            if (rawRepository != null) {
+                originalRepository.merge(rawRepository);
+                originalRepository.persist();
+                return originalRepository;
+            } else {
+                return null;
             }
         }
     }

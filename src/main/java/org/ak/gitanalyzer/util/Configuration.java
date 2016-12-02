@@ -49,16 +49,30 @@ public enum Configuration {
     public Set<String> BUILD_FILE_MARKERS;
     public Set<String> SERVICE_COMMIT_MARKERS;
 
-    private Properties teams = new Properties();
-    private Properties locations = new Properties();
-    private Properties authorNameMapping = new Properties();
-    private Properties authorEmailMapping = new Properties();
-    private Properties commonProperties = new Properties();
+    private Properties teams;
+    private Properties locations;
+    private Properties authorNameMapping;
+    private Properties authorEmailMapping;
+    private Properties commonProperties;
 
     private StartMode startMode;
 
     private File configDirectory;
     private File cacheDirectory;
+
+    Configuration() {
+        clean();
+    }
+
+    public void clean() {
+        teams = new Properties();
+        locations = new Properties();
+        authorNameMapping = new Properties();
+        authorEmailMapping = new Properties();
+        commonProperties = new Properties();
+        configDirectory = null;
+        cacheDirectory = null;
+    }
 
     public void initConfiguration() throws FileException {
         FileHelper fileHelper = FileHelper.asDirectory(getConfigDirectory());

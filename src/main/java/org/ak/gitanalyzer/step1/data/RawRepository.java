@@ -94,7 +94,7 @@ public class RawRepository implements Serializable {
             System.out.println("Raw Repository restored from file " + tempFile.getPath());
             return rawRepository;
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             throw new FileException(e.getMessage(), e);
         }
     }
