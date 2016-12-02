@@ -16,6 +16,12 @@ import java.util.stream.Collectors;
  */
 public class FileAuthorsAnalyzer extends Analyzer {
 
+    private int minAuthorsCount;
+
+    public FileAuthorsAnalyzer setMinAuthorsCount(int threshold) {
+        this.minAuthorsCount = threshold;
+        return this;
+    }
 
     /**
      * Range files by count of authors.
@@ -28,7 +34,7 @@ public class FileAuthorsAnalyzer extends Analyzer {
                 .map(entry -> calculateFileAuthors(entry.getKey(), entry.getValue()))
                 .forEach(fileAuthorsList::add);
         fileAuthorsList.sort(FileAuthors::compareTo);
-        return fileAuthorsList;
+        return filter(fileAuthorsList);
     }
 
     /**
@@ -49,11 +55,14 @@ public class FileAuthorsAnalyzer extends Analyzer {
         });
         List<FileAuthors> moduleAuthors = new ArrayList<>(moduleAuthorsMap.values());
         moduleAuthors.sort(FileAuthors::compareTo);
-        return moduleAuthors;
+        return filter(moduleAuthors);
     }
 
-    public List<FileAuthors> filter(List<FileAuthors> initialList, int threshold) {
-        return initialList.stream().filter(fa -> fa.getAuthorsCount() >= threshold).collect(Collectors.toList());
+    private List<FileAuthors> filter(List<FileAuthors> initialList) {
+        if (minAuthorsCount > 0) {
+            return initialList.stream().filter(fa -> fa.getAuthorsCount() >= minAuthorsCount).collect(Collectors.toList());
+        }
+        return initialList;
     }
 
     private FileAuthors calculateFileAuthors(File file, List<Link> links) {

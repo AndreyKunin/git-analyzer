@@ -2,6 +2,7 @@ package org.ak.gitanalyzer.step3;
 
 import org.ak.gitanalyzer.step2.data.DataRepository;
 import org.ak.gitanalyzer.step2.data.Link;
+import org.ak.gitanalyzer.step3.data.Forest;
 import org.ak.gitanalyzer.step3.data.Graph;
 
 /**
@@ -9,12 +10,8 @@ import org.ak.gitanalyzer.step3.data.Graph;
  */
 public class GraphAnalyzer extends Analyzer {
 
-    public Graph getUndesirableFileDependencies(DataRepository dataRepository, int minWeight) {
-        return new Graph(dataRepository, this::filter, minWeight);
-    }
-
-    public Graph getUndesirableModuleDependencies(Graph graph) {
-        return graph.extractModuleDependencies();
+    public Forest getDependencies(DataRepository dataRepository, int minWeight) {
+        return Graph.extractDependencies(dataRepository, this::filter, minWeight);
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.util.function.Consumer;
  */
 public class Subprocess {
 
-    public static void start(Consumer<Integer> exitCallback, String ... command) throws SubprocessException {
+    public void start(Consumer<Integer> exitCallback, String ... command) throws SubprocessException {
         Process process;
         try {
             ProcessBuilder builder = new ProcessBuilder(command);
@@ -28,7 +28,7 @@ public class Subprocess {
 
     }
 
-    public static SubprocessResult execute(String workingDirectory, boolean redirectStderr, String ... command) throws SubprocessException {
+    public SubprocessResult execute(String workingDirectory, boolean redirectStderr, String ... command) throws SubprocessException {
         File directory = new File(workingDirectory);
         if (!directory.exists()) {
             throw new SubprocessException("Working directory " + workingDirectory + " not found.");
@@ -77,7 +77,12 @@ public class Subprocess {
         private String[] commandWithParameters;
         private int exitCode;
 
-        private SubprocessResult(String ... command) {
+        public SubprocessResult(String ... command) {
+            this.commandWithParameters = command;
+        }
+
+        public SubprocessResult(int exitCode, String ... command) {
+            this.exitCode = exitCode;
             this.commandWithParameters = command;
         }
 

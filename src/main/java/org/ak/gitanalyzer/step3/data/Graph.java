@@ -21,15 +21,22 @@ public class Graph {
     private List<ActualDependency> edges = new ArrayList<>();
     private Limit nodeThreshold;
     private Limit edgeThreshold;
-    private int nodeId = 0;
+    private static int nodeId = 0;
 
     private Graph() {
     }
 
-    public Graph(DataRepository dataRepository, Predicate<Link> filter, int minWeight) {
+    public static Forest extractDependencies(DataRepository dataRepository, Predicate<Link> filter, int minWeight) {
         final int refactoringCommitsIndicator = Configuration.INSTANCE.getInt("GIT.refactoring.commits.min.size", 500);
-        Map<File, Node> nodes = new HashMap<>();
-        Map<ActualDependency, ActualDependency> edges = new HashMap<>();
+        Graph fileGraph = new Graph();
+        Graph moduleGraph = new Graph();
+
+        Map<File, Node> fileNodes = new HashMap<>();
+        Map<File, Node> moduleNodes = new HashMap<>();
+
+        Map<ActualDependency, ActualDependency> fileEdges = new HashMap<>();
+        Map<ActualDependency, ActualDependency> moduleEdges = new HashMap<>();
+
         dataRepository.getCommits().values().stream().filter(list -> list.size() < refactoringCommitsIndicator).forEach(list -> {
             for (int i = 0; i < list.size() - 1; ++i) {
                 Link l1 = list.get(i);
@@ -48,55 +55,32 @@ public class Graph {
                         continue;
                     }
 
-                    putEdge(edges, f1, f2, 1);
-                    putNode(nodes, f1, 1);
-                    putNode(nodes, f2, 1);
+                    putEdge(fileEdges, f1, f2, 1);
+                    putNode(fileNodes, f1, 1);
+                    putNode(fileNodes, f2, 1);
                 }
             }
         });
 
-        edges.keySet().forEach(edge -> {
-            if (edge.getWeight() < minWeight) {
-                removeNode(nodes, edge, edge.getNode1());
-                removeNode(nodes, edge, edge.getNode2());
-            } else {
-                this.edges.add(edge);
-            }
-        });
-        this.nodes.addAll(nodes.values());
-
-        this.nodes.sort(Node::compareTo);
-        this.edges.sort(ActualDependency::compareTo);
-
-        nodeThreshold = findThreshold(this.nodes, Node::getWeight, DANGER_PERCENT, WARNING_PERCENT);
-        edgeThreshold = findThreshold(this.edges, ActualDependency::getWeight, DANGER_PERCENT, WARNING_PERCENT);
-    }
-
-    public Graph extractModuleDependencies() {
-        Graph moduleGraph = new Graph();
-        Map<File, Node> moduleNodes = new HashMap<>();
-        Map<ActualDependency, ActualDependency> moduleDependencies = new HashMap<>();
-        edges.forEach(edge -> {
+        fileEdges.keySet().forEach(edge -> {
             File f1 = edge.getNode1();
             File f2 = edge.getNode2();
             File m1 = new File(f1.getModuleName());
             File m2 = new File(f2.getModuleName());
 
-            putEdge(moduleDependencies, m1, m2, edge.getWeight());
+            putEdge(moduleEdges, m1, m2, edge.getWeight());
             putNode(moduleNodes, m1, edge.getWeight());
             putNode(moduleNodes, m2, edge.getWeight());
+
+            filterEdge(minWeight, fileGraph, fileNodes, edge);
         });
 
-        moduleGraph.edges.addAll(moduleDependencies.values());
-        moduleGraph.nodes.addAll(moduleNodes.values());
+        moduleEdges.keySet().forEach(edge -> filterEdge(minWeight, moduleGraph, moduleNodes, edge));
 
-        moduleGraph.nodes.sort(Node::compareTo);
-        moduleGraph.edges.sort(ActualDependency::compareTo);
+        addNodes(fileGraph, fileNodes);
+        addNodes(moduleGraph, moduleNodes);
 
-        moduleGraph.nodeThreshold = findThreshold(moduleGraph.nodes, Node::getWeight, DANGER_PERCENT, WARNING_PERCENT);
-        moduleGraph.edgeThreshold = findThreshold(moduleGraph.edges, ActualDependency::getWeight, DANGER_PERCENT, WARNING_PERCENT);
-
-        return moduleGraph;
+        return new Forest(fileGraph, moduleGraph);
     }
 
     public List<Node> getNodes() {
@@ -115,7 +99,26 @@ public class Graph {
         return edgeThreshold;
     }
 
-    private void removeNode(Map<File, Node> nodes, ActualDependency edge, File file) {
+    private static void addNodes(Graph graph, Map<File, Node> fileNodes) {
+        graph.nodes.addAll(fileNodes.values());
+
+        graph.nodes.sort(Node::compareTo);
+        graph.edges.sort(ActualDependency::compareTo);
+
+        graph.nodeThreshold = findThreshold(graph.nodes, Node::getWeight, DANGER_PERCENT, WARNING_PERCENT);
+        graph.edgeThreshold = findThreshold(graph.edges, ActualDependency::getWeight, DANGER_PERCENT, WARNING_PERCENT);
+    }
+
+    private static void filterEdge(int minWeight, Graph graph, Map<File, Node> nodeMap, ActualDependency edge) {
+        if (edge.getWeight() < minWeight) {
+            removeNode(nodeMap, edge, edge.getNode1());
+            removeNode(nodeMap, edge, edge.getNode2());
+        } else {
+            graph.edges.add(edge);
+        }
+    }
+
+    private static void removeNode(Map<File, Node> nodes, ActualDependency edge, File file) {
         Node node = nodes.get(file);
         node.addWeight(-edge.getWeight());
         if (node.getWeight() <= 0) {
@@ -123,7 +126,7 @@ public class Graph {
         }
     }
 
-    private void putEdge(Map<ActualDependency, ActualDependency> edges, File f1, File f2, double weight) {
+    private static void putEdge(Map<ActualDependency, ActualDependency> edges, File f1, File f2, double weight) {
         ActualDependency actualDependency = new ActualDependency(f1, f2, weight);
         if (edges.containsKey(actualDependency)) {
             edges.get(actualDependency).addWeight(weight);
@@ -132,7 +135,7 @@ public class Graph {
         }
     }
 
-    private void putNode(Map<File, Node> nodes, File file, double weight) {
+    private static void putNode(Map<File, Node> nodes, File file, double weight) {
         if (!nodes.containsKey(file)) {
             nodes.put(file, new Node(nodeId++, file, weight));
         } else {
@@ -140,7 +143,7 @@ public class Graph {
         }
     }
 
-    private <T> Limit findThreshold(List<T> list, Function<T, Double> getWeight, int p1, int p2) {
+    private static <T> Limit findThreshold(List<T> list, Function<T, Double> getWeight, int p1, int p2) {
         int size = list.size();
         if (size == 0) {
             return new Limit(0, 0);

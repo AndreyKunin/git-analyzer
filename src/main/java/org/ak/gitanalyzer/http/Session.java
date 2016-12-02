@@ -27,8 +27,7 @@ public class Session {
     private List<ActivitySummary<Author>> authorActivity;
     private List<ActivitySummary<String>> teamActivity;
     private ActivitySummary<String> projectActivity;
-    private Graph fileDependencies;
-    private Graph moduleDependencies;
+    private Forest dependencies;
     private List<Author> filteredAuthors;
 
     private String fileMask;
@@ -50,8 +49,7 @@ public class Session {
         authorActivity = null;
         teamActivity = null;
         projectActivity = null;
-        fileDependencies = null;
-        moduleDependencies = null;
+        dependencies = null;
         filteredAuthors = null;
     }
 
@@ -159,20 +157,12 @@ public class Session {
         this.projectActivity = projectActivity;
     }
 
-    public Graph getFileDependencies() {
-        return fileDependencies;
+    public Forest getDependencies() {
+        return dependencies;
     }
 
-    public void setFileDependencies(Graph fileDependencies) {
-        this.fileDependencies = fileDependencies;
-    }
-
-    public Graph getModuleDependencies() {
-        return moduleDependencies;
-    }
-
-    public void setModuleDependencies(Graph moduleDependencies) {
-        this.moduleDependencies = moduleDependencies;
+    public void setDependencies(Forest dependencies) {
+        this.dependencies = dependencies;
     }
 
     public List<Author> getFilteredAuthors() {

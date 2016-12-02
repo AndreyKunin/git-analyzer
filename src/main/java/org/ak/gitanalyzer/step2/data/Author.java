@@ -7,11 +7,13 @@ import java.util.Comparator;
  */
 public class Author {
 
-    final String email;
-    final String name;
+    private final String email;
+    private final String name;
 
-    String location;
-    String team;
+    private int hashCode;
+
+    private String location;
+    private String team;
 
     public Author(String email, String name) {
         this.email = email;
@@ -55,6 +57,7 @@ public class Author {
 
         Author author = (Author) o;
         String email = this.email == null ? "" : this.email;
+        String name = this.name == null ? "" : this.name;
 
         if (!email.equals(author.email)) return false;
         return name.equals(author.name);
@@ -63,18 +66,25 @@ public class Author {
 
     @Override
     public int hashCode() {
-        String email = this.email == null ? "" : this.email;
-        int result = email.hashCode();
-        result = 31 * result + name.hashCode();
-        return result;
+        if (hashCode == 0) {
+            String email = this.email == null ? "" : this.email;
+            String name = this.name == null ? "" : this.name;
+            int result = email.hashCode();
+            hashCode = 31 * result + name.hashCode();
+        }
+        return hashCode;
     }
 
     public static class NameEmailComparator implements Comparator<Author> {
         @Override
         public int compare(Author o1, Author o2) {
-            int result = (o1.getName() == null ? "" : o1.getName()).compareTo(o2.getName() == null ? "" : o2.getName());
+            String name1 = o1.getName() == null ? "" : o1.getName().toLowerCase();
+            String name2 = o2.getName() == null ? "" : o2.getName().toLowerCase();
+            String email1 = o1.getEmail() == null ? "" : o1.getEmail().toLowerCase();
+            String email2 = o2.getEmail() == null ? "" : o2.getEmail().toLowerCase();
+            int result = name1.compareTo(name2);
             if (result == 0) {
-                result = (o1.getEmail() == null ? "" : o1.getEmail()).compareTo(o2.getEmail() == null ? "" : o2.getEmail());
+                result = email1.compareTo(email2);
             }
             return result;
         }

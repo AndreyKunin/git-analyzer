@@ -18,8 +18,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class StatisticsCollector {
 
+    private Subprocess subprocess;
+
     private int filesCount;
     private AtomicInteger filesRemained = new AtomicInteger();
+
+    public StatisticsCollector(Subprocess subprocess) {
+        if (subprocess == null) {
+            subprocess = new Subprocess();
+        }
+        this.subprocess = subprocess;
+    }
 
     public RawRepository collect(Date dateFrom) throws SubprocessException {
         Date creationDate = new Date();
@@ -69,7 +78,7 @@ public class StatisticsCollector {
         LsTreeParser gitOutputParser = new LsTreeParser();
         String[] lsTreeCommand = new GitLsTreeBuilder().setBranchName(branchName).buildCommand();
         List<RawFile> rawFiles = new ArrayList<>();
-        Subprocess.execute(gitRepositoryPath, false, lsTreeCommand)
+        subprocess.execute(gitRepositoryPath, false, lsTreeCommand)
                 .assertErrors()
                 .assertExitCode()
                 .assertOutputPresent()
@@ -97,7 +106,7 @@ public class StatisticsCollector {
             try {
                 LogParser gitOutputParser = new LogParser();
                 String[] logCommand = new GitLogBuilder().setFileName(file.getPath()).setSinceDate(dateFrom).setUntilDate(dateTo).buildCommand();
-                Subprocess.execute(gitRepositoryPath, false, logCommand)
+                subprocess.execute(gitRepositoryPath, false, logCommand)
                         .assertErrors()
                         .assertExitCode()
                         .getOut()
@@ -129,7 +138,7 @@ public class StatisticsCollector {
     private List<RawFile> addPrefixes(List<RawFile> files, String prefix) {
         List<RawFile> newFiles = new ArrayList<>();
         files.forEach(file -> {
-            RawFile newFile = new RawFile(prefix + "/" + file.getPath());
+            RawFile newFile = new RawFile(prefix + (file.getPath().startsWith("/") ? "" : "/") + file.getPath());
             newFile.getCommits().addAll(file.getCommits());
             newFiles.add(newFile);
         });

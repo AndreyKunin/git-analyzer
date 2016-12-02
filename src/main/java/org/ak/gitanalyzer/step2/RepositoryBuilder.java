@@ -8,6 +8,7 @@ import org.ak.gitanalyzer.step2.data.*;
 import org.ak.gitanalyzer.util.Configuration;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Andrew on 01.10.2016.
@@ -16,7 +17,8 @@ public class RepositoryBuilder {
 
     private final static RawCommitComparator RC_COMPARATOR = new RawCommitComparator();
 
-    public DataRepository build(RawRepository rawRepository, String jiraPrefix) {
+    public DataRepository build(RawRepository rawRepository) {
+        final String jiraPrefix = Configuration.INSTANCE.getString("GIT.jira.prefix");
         final int batchSize = Configuration.INSTANCE.getInt("GIT.read.batch.size", 1024);
         Date buildDate = rawRepository.getBuildDate();
         List<List<RawFile>> splittedList = partition(rawRepository.getRawFiles(), batchSize);
@@ -99,7 +101,14 @@ public class RepositoryBuilder {
                 filter(rawFile.getCommits()).forEach(commit -> builder.setRawCommit(commit).build());
             }
 
-            weightedLinks.values().forEach(values -> values.forEach(link -> link.setWeight(1.0/values.size())));
+            weightedLinks.values().forEach(linkList ->
+                    linkList.forEach(link -> link.setWeight(0.0))
+            );
+
+            weightedLinks.values().forEach(linkList -> {
+                double addedValue = 1.0 / linkList.size();
+                linkList.forEach(link -> link.setWeight(link.getWeight() + addedValue));
+            });
         }
 
         private List<RawCommit> filter(List<RawCommit> commits) {
@@ -156,7 +165,7 @@ public class RepositoryBuilder {
                     Configuration.INSTANCE.getAuthorName(rawCommit.getAuthorName())
             );
             Commit commit = new Commit(rawCommit.getHash(), rawCommit.getCommitDateTime(), rawCommit.getComment());
-            if (dataRepository.getCommits().containsKey(commit) || isServiceAuthor(author) || isServiceCommit(commit)) {
+            if (isServiceAuthor(author) || isServiceCommit(commit)) {
                 return;
             }
 
@@ -176,52 +185,62 @@ public class RepositoryBuilder {
         }
 
         private void groupLink(Map<Integer, List<Link>> weightedLinks, String jiraPrefix, Link link) {
-            int weightHashCode = weightHashCode(link, jiraPrefix);
-            if (weightHashCode == -1) {
+            List<Integer> weightHashCodes = weightHashCodes(link, jiraPrefix);
+            if (weightHashCodes.size() == 0) {
                 return;
             }
-            List<Link> sameLinks = weightedLinks.get(weightHashCode);
-            if (sameLinks == null) {
-                sameLinks = new ArrayList<>();
-                weightedLinks.put(weightHashCode, sameLinks);
-            }
-            sameLinks.add(link);
+            weightHashCodes.forEach(weightHashCode -> {
+                List<Link> sameLinks = weightedLinks.get(weightHashCode);
+                if (sameLinks == null) {
+                    sameLinks = new ArrayList<>();
+                    weightedLinks.put(weightHashCode, sameLinks);
+                }
+                sameLinks.add(link);
+            });
         }
 
-        private int weightHashCode(Link link, String jiraPrefix) {
+        private List<Integer> weightHashCodes(Link link, String jiraPrefix) {
             if (jiraPrefix == null) {
-                return -1;
+                return Collections.emptyList();
             }
-            String jiraRef = null;
+            Collection<String> jiraRefs = null;
             if (link.getCommit().getComment() != null) {
-                jiraRef = getJiraReference(link.getCommit().getComment(), jiraPrefix);
+                jiraRefs = getJiraReferences(link.getCommit().getComment(), jiraPrefix);
             }
-            if (jiraRef != null) {
-                return (jiraRef + '|' + link.getAuthor().getName() + '|' + link.getAuthor().getEmail()).hashCode();
+            if (jiraRefs != null && jiraRefs.size() > 0) {
+                return jiraRefs.stream()
+                        .map(jiraRef -> (jiraRef + '|' + link.getAuthor().getName() + '|' + link.getAuthor().getEmail()).hashCode())
+                        .collect(Collectors.toList());
             }
-            return -1;
+            return Collections.emptyList();
         }
 
-        private String getJiraReference(String value, String jiraPrefix) {
+        private Collection<String> getJiraReferences(String value, String jiraPrefix) {
             if (value == null) {
-                return null;
+                return Collections.emptySet();
             }
-            int jiraRefIndex = value.indexOf(jiraPrefix);
-            StringBuilder sb = new StringBuilder();
-            if (jiraRefIndex != -1) {
-                for (int i = jiraRefIndex + jiraPrefix.length(); i < value.length(); ++i) {
-                    char c = value.charAt(i);
-                    if (c >= '0' && c <= '9') {
-                        sb.append(c);
-                    } else {
-                        break;
+            Set<String> result = new HashSet<>();
+            int jiraRefIndex = 0;
+            while (jiraRefIndex != -1) {
+                jiraRefIndex = value.indexOf(jiraPrefix, jiraRefIndex);
+                StringBuilder sb = new StringBuilder();
+                if (jiraRefIndex != -1) {
+                    for (int i = jiraRefIndex + jiraPrefix.length(); i < value.length(); ++i) {
+                        char c = value.charAt(i);
+                        if (c >= '0' && c <= '9') {
+                            sb.append(c);
+                        } else {
+                            break;
+                        }
+                    }
+                    jiraRefIndex += jiraPrefix.length();
+                    if (sb.length() > 0) {
+                        jiraRefIndex += sb.length();
+                        result.add(sb.insert(0, jiraPrefix).toString());
                     }
                 }
             }
-            if (sb.length() > 0) {
-                return sb.insert(0, jiraPrefix).toString();
-            }
-            return null;
+            return result;
         }
     }
 

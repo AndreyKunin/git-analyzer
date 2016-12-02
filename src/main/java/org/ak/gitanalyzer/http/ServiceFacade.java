@@ -290,40 +290,40 @@ public enum ServiceFacade {
 
     public String getSharedFiles(Map<String, String> parameters) {
         FileAuthorsAnalyzer fileAuthorsAnalyzer = new FileAuthorsAnalyzer()
+                .setMinAuthorsCount(Configuration.INSTANCE.getInt("FileAuthorsAnalyzer.min.authors.count", 0))
                 .setDateFrom(SessionFacade.INSTANCE.getDateFrom(parameters))
                 .cast();
         List<FileAuthors> fileStatistics = SessionFacade.INSTANCE.lazyGetFileAuthorsStatistics(parameters, fileAuthorsAnalyzer);
-        fileStatistics = fileAuthorsAnalyzer.filter(fileStatistics, 5);
         SharedFilesStatisticsProcessor processor = new SharedFilesStatisticsProcessor(Configuration.nf.get());
         return processor.getSharedFiles(fileStatistics, "path");
     }
 
     public String getSharedFilesCSV(Map<String, String> parameters) {
         FileAuthorsAnalyzer fileAuthorsAnalyzer = new FileAuthorsAnalyzer()
+                .setMinAuthorsCount(Configuration.INSTANCE.getInt("FileAuthorsAnalyzer.min.authors.count", 0))
                 .setDateFrom(SessionFacade.INSTANCE.getDateFrom(parameters))
                 .cast();
         List<FileAuthors> fileStatistics = SessionFacade.INSTANCE.lazyGetFileAuthorsStatistics(parameters, fileAuthorsAnalyzer);
-        fileStatistics = fileAuthorsAnalyzer.filter(fileStatistics, 5);
         SharedFilesStatisticsProcessor processor = new SharedFilesStatisticsProcessor(Configuration.nf.get());
         return processor.getSharedFilesCSV(fileStatistics);
     }
 
     public String getSharedModules(Map<String, String> parameters) {
         FileAuthorsAnalyzer fileAuthorsAnalyzer = new FileAuthorsAnalyzer()
+                .setMinAuthorsCount(Configuration.INSTANCE.getInt("FileAuthorsAnalyzer.min.authors.count", 0))
                 .setDateFrom(SessionFacade.INSTANCE.getDateFrom(parameters))
                 .cast();
         List<FileAuthors> moduleStatistics = SessionFacade.INSTANCE.lazyGetModuleAuthorsStatistics(parameters, fileAuthorsAnalyzer);
-        moduleStatistics = fileAuthorsAnalyzer.filter(moduleStatistics, 5);
         SharedFilesStatisticsProcessor processor = new SharedFilesStatisticsProcessor(Configuration.nf.get());
         return processor.getSharedFiles(moduleStatistics, "moduleName");
     }
 
     public String getSharedModulesCSV(Map<String, String> parameters) {
         FileAuthorsAnalyzer fileAuthorsAnalyzer = new FileAuthorsAnalyzer()
+                .setMinAuthorsCount(Configuration.INSTANCE.getInt("FileAuthorsAnalyzer.min.authors.count", 0))
                 .setDateFrom(SessionFacade.INSTANCE.getDateFrom(parameters))
                 .cast();
         List<FileAuthors> moduleStatistics = SessionFacade.INSTANCE.lazyGetModuleAuthorsStatistics(parameters, fileAuthorsAnalyzer);
-        moduleStatistics = fileAuthorsAnalyzer.filter(moduleStatistics, 5);
         SharedFilesStatisticsProcessor processor = new SharedFilesStatisticsProcessor(Configuration.nf.get());
         return processor.getSharedFilesCSV(moduleStatistics);
     }

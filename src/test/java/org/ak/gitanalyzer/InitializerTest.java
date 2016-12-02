@@ -1,4 +1,5 @@
-import org.ak.gitanalyzer.Main;
+package org.ak.gitanalyzer;
+
 import org.ak.gitanalyzer.util.Configuration;
 import org.ak.gitanalyzer.util.FileException;
 import org.junit.AfterClass;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import static org.ak.gitanalyzer.util.TestHelper.deleteDir;
 import static org.ak.gitanalyzer.util.Configuration.StartMode.INSTALL;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.*;
@@ -25,8 +27,9 @@ public class InitializerTest {
     }
 
     @AfterClass
-    public static void clean() {
+    public static void clean() throws Exception {
         deleteTempDirs();
+        Main.main(new String[] {"-install"});
         Configuration.INSTANCE.clean();
     }
 
@@ -137,16 +140,5 @@ public class InitializerTest {
         deleteDir(new File("./test2/cache"));
         deleteDir(new File("./test"));
         deleteDir(new File("./test2"));
-    }
-
-    private static void deleteDir(File dir) {
-        String[] entries = dir.list();
-        if (entries != null) {
-            for (String name : entries) {
-                File file = new File(dir.getPath(), name);
-                file.delete();
-            }
-        }
-        dir.delete();
     }
 }

@@ -1,9 +1,11 @@
 package org.ak.gitanalyzer.util;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * Created by Andrew on 28.09.2016.
@@ -114,6 +116,27 @@ public class FileHelper {
 
     public static FileHelper asDirectory(File file) throws FileException {
         return asDirectory(() -> file);
+    }
+
+    public static String quoteFileMask(String fileMask) {
+        String fileMaskQuoted = null;
+        if (fileMask != null) {
+            fileMask = fileMask.trim();
+            if (fileMask.length() != 0) {
+                fileMaskQuoted = Arrays.stream(fileMask.split("\\*"))
+                        .map(Pattern::quote)
+                        .reduce((p1, p2) -> p1 + ".*" + p2)
+                        .orElse(fileMask.contains("*") ? "" : Pattern.quote(fileMask));
+                fileMaskQuoted = fileMaskQuoted.replace("\\Q\\E", "");
+                if (!fileMaskQuoted.startsWith(".*")) {
+                    fileMaskQuoted = ".*" + fileMaskQuoted;
+                }
+                if (!fileMaskQuoted.endsWith(".*")) {
+                    fileMaskQuoted = fileMaskQuoted + ".*";
+                }
+            }
+        }
+        return fileMaskQuoted;
     }
 
     private String getDescription() {

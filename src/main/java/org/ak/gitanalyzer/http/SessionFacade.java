@@ -4,13 +4,13 @@ import org.ak.gitanalyzer.step2.data.Author;
 import org.ak.gitanalyzer.step3.*;
 import org.ak.gitanalyzer.step3.data.*;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.ak.gitanalyzer.http.ServiceFacade.SESSION_ID;
+import static org.ak.gitanalyzer.util.FileHelper.quoteFileMask;
 
 /**
  * Created by Andrew on 26.10.2016.
@@ -46,24 +46,9 @@ public enum SessionFacade {
 
     public void setFileMask(Map<String, String> parameters, String fileMask) {
         Session session = getSession(parameters);
-        String fileMaskQuoted = null;
-        if (fileMask != null) {
-            fileMask = fileMask.trim();
-            if (fileMask.length() == 0) {
-                fileMask = null;
-            } else {
-                fileMaskQuoted = Arrays.stream(fileMask.split("\\*"))
-                        .map(Pattern::quote)
-                        .reduce((p1, p2) -> p1 + ".*" + p2)
-                        .orElse(fileMask.contains("*") ? "" : Pattern.quote(fileMask));
-                fileMaskQuoted = fileMaskQuoted.replace("\\Q\\E", "");
-                if (!fileMaskQuoted.startsWith(".*")) {
-                    fileMaskQuoted = ".*" + fileMaskQuoted;
-                }
-                if (!fileMaskQuoted.endsWith(".*")) {
-                    fileMaskQuoted = fileMaskQuoted + ".*";
-                }
-            }
+        String fileMaskQuoted = quoteFileMask(fileMask);
+        if (fileMaskQuoted == null) {
+            fileMask = null;
         }
         session.setFileMask(fileMask, fileMaskQuoted);
     }
@@ -200,22 +185,19 @@ public enum SessionFacade {
     }
 
     public Graph lazyGetFileDependencies(Map<String, String> parameters, GraphAnalyzer graphAnalyzer) {
-        Session session = getSession(parameters);
-        Graph result = session.getFileDependencies();
-        if (result == null) {
-            result = graphAnalyzer.getUndesirableFileDependencies(Application.INSTANCE.getDataRepository(), 3);
-            session.setFileDependencies(result);
-        }
-        return result;
+        return lazyGetDependencies(parameters, graphAnalyzer).getFileGraph();
     }
 
     public Graph lazyGetModuleDependencies(Map<String, String> parameters, GraphAnalyzer graphAnalyzer) {
+        return lazyGetDependencies(parameters, graphAnalyzer).getModuleGraph();
+    }
+
+    private Forest lazyGetDependencies(Map<String, String> parameters, GraphAnalyzer graphAnalyzer) {
         Session session = getSession(parameters);
-        Graph result = session.getModuleDependencies();
+        Forest result = session.getDependencies();
         if (result == null) {
-            Graph dependencies = lazyGetFileDependencies(parameters, graphAnalyzer);
-            result = graphAnalyzer.getUndesirableModuleDependencies(dependencies);
-            session.setModuleDependencies(result);
+            result = graphAnalyzer.getDependencies(Application.INSTANCE.getDataRepository(), 3);
+            session.setDependencies(result);
         }
         return result;
     }

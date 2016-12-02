@@ -103,11 +103,15 @@ public class DataRepository {
 
     private boolean compare(Supplier<String> supplier, String valueToCompare) {
         String value = supplier.get();
-        if (valueToCompare != null) {
-            return value != null && value.equals(valueToCompare);
+        if (!isEmpty(valueToCompare)) {
+            return !isEmpty(value) && value.equals(valueToCompare);
         } else {
-            return value == null || value.length() == 0;
+            return isEmpty(value);
         }
+    }
+
+    private boolean isEmpty(String value) {
+        return value == null || value.length() == 0;
     }
 
     private static <E> void addEntity(E entity, Link link, Map<E, List<Link>> map, Map<E, E> tmpMap) {

@@ -38,7 +38,7 @@ public class AgeStatistics {
     }
 
     public double getStabilityPercent() {
-        return (double) nowMinusLast / ((double) lastMinusFirst + (double) nowMinusLast) * 100.0;
+        return (double) nowMinusLast / (double) (lastMinusFirst + nowMinusLast) * 100.0;
     }
 
     public String intervalToString(long interval) {
