@@ -26,9 +26,9 @@ Reason to build GitAnalyzer is making a repository analysis tool with convenient
 ### Application modes
 
 GitAnalyzer can be run as either a server or a standalone client. There are 3 startup modes for it:
-1. **Server mode**. It starts a Java process on the server machine and provides an HTTP interface for thin client. GitAnalyzer performs the incremental updates in background to make the data always up-to-date. To run application in server mode use command-line parameter ```-server```.
-2. **Client mode**. It starts a Java process with reduced server as well as a client browser. When user closes the browser the server shuts down. Statistics gathering performs once. To run application in client mode use command-line parameter ```-client``` or without parameters. This is a default mode.
-3. **Installation mode**. It starts in command-line mode, installs the application to directory you specified, and gives up. To install the application use command-line parameter ```-install```.
+- **Server mode**. It starts a Java process on the server machine and provides an HTTP interface for thin client. GitAnalyzer performs the incremental updates in background to make the data always up-to-date. To run application in server mode use command-line parameter ```-server```.
+- **Client mode**. It starts a Java process with reduced server as well as a client browser. When user closes the browser the server shuts down. Statistics gathering performs once. To run application in client mode use command-line parameter ```-client``` or without parameters. This is a default mode.
+- **Installation mode**. It starts in command-line mode, installs the application to directory you specified, and gives up. To install the application use command-line parameter ```-install```.
 
 ## Collected metrics
 
@@ -126,11 +126,13 @@ Using the filtering by mask you can look who is contributing more to different f
 Performance by locations shows two maps. First map shows the absolute and relative amount of changes per location. Second map shows the efficiency: average amount of changes per author.
 
 ![c-locations-map](/screenshots/c-locations-map.png)
+
 ![c-locations-map-eff](/screenshots/c-locations-map-eff.png)
 
 Performance by teams shows two bar charts. First chart shows the absolute and relative amount of changes per team. Second map shows the efficiency: average amount of changes per author.
 
 ![c-teams-chart](/screenshots/c-teams-chart.png)
+
 ![c-teams-chart-eff](/screenshots/c-teams-chart-eff.png)
 
 Teams performance is also detailed in table.
@@ -148,8 +150,11 @@ The last table shows the individual performance in absolute and relative numbers
 These tables show which teams and authors are mostly contributing to the module. It allows you find who is responsible for that file/module. Or who has bigger expertise of this file/module. This is useful when you want to get an advice or assistance, or assign some work to appropriate person.
 
 ![popup-topauthors-file](popup-topauthors-file.png)
+
 ![popup-topauthors-module](popup-topauthors-module.png)
+
 ![popup-topteams-file](popup-topteams-file.png)
+
 ![popup-topteams-module](popup-topteams-module.png)
 
 These tables can be opened from links "*Authors*" and "*Teams*" wherever you find them in other tables.
@@ -159,8 +164,11 @@ These tables can be opened from links "*Authors*" and "*Teams*" wherever you fin
 These tables show which files and modules are mostly changed by the given team/author. In other words, who is the actual owner of particular code.
 
 ![popup-topfiles-author](popup-topfiles-author.png)
+
 ![popup-topfiles-team](popup-topfiles-team.png)
+
 ![popup-topmodules-author](popup-topmodules-author.png)
+
 ![popup-topmodules-team](popup-topmodules-team.png)
 
 These tables can be opened from links "*Files*" and "*Modules*" wherever you find them in other tables.
