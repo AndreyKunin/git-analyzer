@@ -7,7 +7,6 @@ import org.ak.gitanalyzer.step1.data.RawRepository;
 import org.ak.gitanalyzer.step1.git.Subprocess;
 import org.ak.gitanalyzer.step1.git.SubprocessException;
 import org.ak.gitanalyzer.util.Configuration;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +26,7 @@ import static org.junit.Assert.*;
 /**
  * Created by Andrew on 21.11.2016.
  */
-public class GitLoaderTest implements Serializable {
+public class GitLoaderTest extends TestFixture implements Serializable {
 
     private static final SimpleDateFormat df = new SimpleDateFormat("E MMM d HH:mm:ss yyyy Z", Locale.US);
 
@@ -38,14 +37,6 @@ public class GitLoaderTest implements Serializable {
         deleteDir(new File("./target/classes/cache"));
         Main.main(new String[] {"-install"});
         Configuration.INSTANCE.initConfiguration();
-    }
-
-    @AfterClass
-    public static void clean() throws Exception {
-        deleteDir(new File("./target/classes/conf"));
-        deleteDir(new File("./target/classes/cache"));
-        Configuration.INSTANCE.clean();
-        Main.main(new String[] {"-install"});
     }
 
     @Test

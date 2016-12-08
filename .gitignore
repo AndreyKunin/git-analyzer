@@ -3,6 +3,7 @@
 /target
 /conf
 /cache
+/backup
 /test
 /test2
 /GitAnalyzer.iml

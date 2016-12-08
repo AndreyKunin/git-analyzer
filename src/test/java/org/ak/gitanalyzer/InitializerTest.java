@@ -29,8 +29,6 @@ public class InitializerTest {
     @AfterClass
     public static void clean() throws Exception {
         deleteTempDirs();
-        Main.main(new String[] {"-install"});
-        Configuration.INSTANCE.clean();
     }
 
     @Test

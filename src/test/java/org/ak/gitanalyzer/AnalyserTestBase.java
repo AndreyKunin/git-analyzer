@@ -8,7 +8,7 @@ import org.junit.Ignore;
  * Created by Andrew on 26.11.2016.
  */
 @Ignore
-public abstract class AnalyserTestBase {
+public abstract class AnalyserTestBase extends TestFixture {
 
     @Before
     public void init() throws Exception {

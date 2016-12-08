@@ -11,10 +11,11 @@ import org.ak.gitanalyzer.step2.data.DataRepository;
 import org.ak.gitanalyzer.step2.data.File;
 import org.ak.gitanalyzer.util.Configuration;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.ak.gitanalyzer.util.TestHelper.*;
@@ -23,16 +24,7 @@ import static org.junit.Assert.*;
 /**
  * Created by Andrew on 24.11.2016.
  */
-public class RepositoryBuilderTest {
-
-    @BeforeClass
-    public static void prepare() throws Exception {
-        Configuration.INSTANCE.clean();
-        deleteDir(new java.io.File("./target/classes/conf"));
-        deleteDir(new java.io.File("./target/classes/cache"));
-        Main.main(new String[] {"-install"});
-        Configuration.INSTANCE.initConfiguration();
-    }
+public class RepositoryBuilderTest extends TestFixture {
 
     @Before
     public void init() throws Exception {
