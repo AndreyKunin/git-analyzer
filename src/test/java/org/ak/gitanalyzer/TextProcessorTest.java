@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by Andrew on 02.12.2016.
  */
-public class TextProcessorTest {
+public class TextProcessorTest extends TestFixture {
 
     @Before
     public void init() throws Exception {
