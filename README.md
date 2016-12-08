@@ -149,13 +149,13 @@ The last table shows the individual performance in absolute and relative numbers
 
 These tables show which teams and authors are mostly contributing to the module. It allows you find who is responsible for that file/module. Or who has bigger expertise of this file/module. This is useful when you want to get an advice or assistance, or assign some work to appropriate person.
 
-![popup-topauthors-file](popup-topauthors-file.png)
+![popup-topauthors-file](/screenshots/popup-topauthors-file.png)
 
-![popup-topauthors-module](popup-topauthors-module.png)
+![popup-topauthors-module](/screenshots/popup-topauthors-module.png)
 
-![popup-topteams-file](popup-topteams-file.png)
+![popup-topteams-file](/screenshots/popup-topteams-file.png)
 
-![popup-topteams-module](popup-topteams-module.png)
+![popup-topteams-module](/screenshots/popup-topteams-module.png)
 
 These tables can be opened from links "*Authors*" and "*Teams*" wherever you find them in other tables.
 
@@ -163,13 +163,13 @@ These tables can be opened from links "*Authors*" and "*Teams*" wherever you fin
 
 These tables show which files and modules are mostly changed by the given team/author. In other words, who is the actual owner of particular code.
 
-![popup-topfiles-author](popup-topfiles-author.png)
+![popup-topfiles-author](/screenshots/popup-topfiles-author.png)
 
-![popup-topfiles-team](popup-topfiles-team.png)
+![popup-topfiles-team](/screenshots/popup-topfiles-team.png)
 
-![popup-topmodules-author](popup-topmodules-author.png)
+![popup-topmodules-author](/screenshots/popup-topmodules-author.png)
 
-![popup-topmodules-team](popup-topmodules-team.png)
+![popup-topmodules-team](/screenshots/popup-topmodules-team.png)
 
 These tables can be opened from links "*Files*" and "*Modules*" wherever you find them in other tables.
 
@@ -177,11 +177,11 @@ These tables can be opened from links "*Files*" and "*Modules*" wherever you fin
 
 Date and file path filtering
 
-![form-filter](form-filter.png)
+![form-filter](/screenshots/form-filter.png)
 
 Search and export to CSV in tables
 
-![form-search-export](form-search-export.png)
+![form-search-export](/screenshots/form-search-export.png)
 
 
 # Installation and configuration
@@ -283,4 +283,4 @@ Dependencies:
 
 Architecture:
 
-![architecture](architecture.png)
+![architecture](/screenshots/architecture.png)
